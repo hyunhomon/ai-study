@@ -52,6 +52,7 @@ def log_data(epoch: int, total_epochs: int, loss: float, log_step: int):
 def show_data(X: list, y: list, predict: list, delay: float = 0.1):
     # 활성화된 요소 삭제
     plt.cla()
+    plt.clf()
     # 실제값을 산점도로 표시
     plt.scatter(X, y)
     # 예측값을 그래프로 표시
