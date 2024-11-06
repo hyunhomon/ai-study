@@ -3,6 +3,7 @@ pip install torch, matplotlib
 """
 
 import torch
+import matplotlib.pyplot as plt
 
 class LinearRegressionModel(torch.nn.Module):
     def __init__(self):
@@ -42,7 +43,17 @@ def log_data(epoch: int, total_epochs: int, loss: float, log_step: int):
     if epoch % log_step == 0:
         print(f'Epoch [{epoch}/{total_epochs}], Loss: {loss:.4f}')
 
-def train_data(X: list, y: list, epochs: int = 100, log_step: int = 10):
+def show_data(X: list, y: list, predict: list, delay: float = 0.1):
+    # 활성화된 요소 삭제
+    plt.cla()
+    # 실제값을 산점도로 표시
+    plt.scatter(X, y)
+    # 예측값을 그래프로 표시
+    plt.plot(X, predict, color='red')
+    # 업데이트 딜레이
+    plt.pause(delay)
+
+def train_data(X: list, y: list, lr: float = 0.001, epochs: int = 100, log_step: int = 10):
     # 모델은 2차원 tensor 데이터를 받을 수 있음
     # list를 tensor로 변환 후 1차원에 차원 추가 (unsqueeze)
     X = torch.tensor(X).unsqueeze(1)
@@ -58,7 +69,7 @@ def train_data(X: list, y: list, epochs: int = 100, log_step: int = 10):
     # 학습률은 다음 가중치를 결정하는 중요한 하이퍼파라미터로, 기울기를 얼마나 반영할지를 정함
     # 학습률이 지나치게 높은 경우에 가중치가 수치적 한계를 넘어감 (nan return)
     # 모델 파라미터는 가중치, 편향 등 미분이 가능한 텐서들로 구성됨
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
+    optimizer = torch.optim.SGD(model.parameters(), lr)
 
     # 모델을 훈련 모드로 설정
     # 모드에 따라 레이어의 동작 방식이 달라지기에 구분함
@@ -79,6 +90,9 @@ def train_data(X: list, y: list, epochs: int = 100, log_step: int = 10):
 
         # 로그 출력
         log_data(epoch+1, epochs, loss.item(), log_step)
+
+        # 데이터 시각화
+        show_data(X, y, outputs.tolist())
     
     # 모델을 평가 모드로 설정
     model.eval()
@@ -91,19 +105,13 @@ def train_data(X: list, y: list, epochs: int = 100, log_step: int = 10):
     # 최종적인 예측값을 list로 반환
     return model(X).tolist()
 
-def show_data(X: list, y: list, predict: list):
-    import matplotlib.pyplot as plt
-
-    # 실제값을 산점도로 표시
-    plt.scatter(X, y)
-    # 예측값을 그래프로 표시
-    plt.plot(X, predict, color='red')
-    plt.show()
-
 def run():
     # 1~10 사이의 랜덤한 값을 100개 생성. 노이즈는 -1.5~1.5 범위의 랜덤한 값
     X, y = generate_test_data(100, (1, 10), (-1.5, 1.5))
+
+    plt.ion()
     predict = train_data(X, y)
-    show_data(X, y, predict)
+    plt.ioff()
+    plt.show()
 
 run()
